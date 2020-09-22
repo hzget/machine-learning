@@ -7,6 +7,8 @@ algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  Note that I have focused on making the code
 simple, easily readable, and easily modifiable.  It is not optimized,
 and omits many desirable features.
+
+It is used to calculate param in the neural networks.
 """
 
 #### Libraries
@@ -20,17 +22,29 @@ class Network(object):
 
     def __init__(self, sizes):
         """The list ``sizes`` contains the number of neurons in the
-        respective layers of the network.  For example, if the list
-        was [2, 3, 1] then it would be a three-layer network, with the
-        first layer containing 2 neurons, the second layer 3 neurons,
-        and the third layer 1 neuron.  The biases and weights for the
-        network are initialized randomly, using a Gaussian
-        distribution with mean 0, and variance 1.  Note that the first
-        layer is assumed to be an input layer, and by convention we
-        won't set any biases for those neurons, since biases are only
-        ever used in computing the outputs from later layers."""
+        respective layers of the network. For example, 
+          [2, 3, 1] --- 3-layers with 2/3/1 neurons respectively.
+          
+        weights and biases are params between layers.
+        For the example of [2, 3, 1]:
+
+        formula between layer 1 and layer 2:
+        [x1, x2] 
+             sigmoid([x1, x2] * [w11, w12] + b1) ---> a1
+         --> sigmoid([x1, x2] * [w21, w22] + b2) ---> a2
+             sigmoid([x1, x2] * [w31, w32] + b3) ---> a3
+        params between layer 1 and layer 2:
+          w = [[w11, w12],          b = [b1,
+               [w21, w22],               b2,
+               [w31, w32]]               b3]
+
+        formula between layer 2 and layer 3:
+        [a1, a2, a3] 
+         --> sigmoid([a1, a2, a3] * [w211, w212, w213] + b) ---> y
+        params between layer 2 and layer 3:
+          w = [w211, w212, w213]    b = b
+        """
         self.num_layers = len(sizes)
-        self.sizes = sizes
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
