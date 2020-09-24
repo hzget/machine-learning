@@ -109,32 +109,23 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         # feedforward
         activation = x
-        activations = [x] # list to store all the activations, layer by layer
-        zs = [] # list to store all the z vectors, layer by layer
+        activations = [x]
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
-            zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+        # sigmoid derivative can reuse the activation in feedforward 
+        # sigmoid(z)' = sigmoid(z) * (1 - sigmoid(z))
+        sd = activation * (1 - activation)
+        # for the output layer
+        delta = self.cost_derivative(activations[-1], y) * sd
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
-        # Note that the variable l in the loop below is used a little
-        # differently to the notation in Chapter 2 of the book.  Here,
-        # l = 1 means the last layer of neurons, l = 2 is the
-        # second-last layer, and so on.  It's a renumbering of the
-        # scheme in the book, used here to take advantage of the fact
-        # that Python can use negative indices in lists.
+        # for the hidden layers
         for l in range(2, self.num_layers):
-#            z = zs[-l]
-#            sp = sigmoid_prime(z)
-            # sigmoid_prime(z) = sigmoid(z)*(1-sigmoid(z)) = a*(1-a)
-            # we can reuse the result from forward phrase
-            a = activations[-l]
-            sp = a * (1-a)
-            delta = sp * np.dot(self.weights[-l+1].transpose(), delta)
+            sd = activations[-l] * (1 - activations[-l])
+            delta = sd * np.dot(self.weights[-l+1].transpose(), delta)
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
@@ -155,8 +146,3 @@ class Network(object):
 def sigmoid(z):
     """The sigmoid function."""
     return 1.0/(1.0+np.exp(-z))
-
-def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
-    s = sigmoid(z)
-    return s*(1-s)
