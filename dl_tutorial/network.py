@@ -14,6 +14,7 @@ It is used to calculate param in the neural networks.
 #### Libraries
 # Standard library
 import random
+import time
 
 # Third-party libraries
 import numpy as np
@@ -67,6 +68,7 @@ class Network(object):
         tracking progress, but slows things down substantially."""
         if test_data: n_test = len(test_data)
         n = len(training_data)
+        start = time.time()
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -79,6 +81,8 @@ class Network(object):
                     j, self.evaluate(test_data), n_test))
             else:
                 print("Epoch {0} complete".format(j))
+        end = time.time()
+        return (end-start)
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -124,9 +128,13 @@ class Network(object):
         # scheme in the book, used here to take advantage of the fact
         # that Python can use negative indices in lists.
         for l in range(2, self.num_layers):
-            z = zs[-l]
-            sp = sigmoid_prime(z)
-            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
+#            z = zs[-l]
+#            sp = sigmoid_prime(z)
+            # sigmoid_prime(z) = sigmoid(z)*(1-sigmoid(z)) = a*(1-a)
+            # we can reuse the result from forward phrase
+            a = activations[-l]
+            sp = a * (1-a)
+            delta = sp * np.dot(self.weights[-l+1].transpose(), delta)
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
@@ -150,4 +158,5 @@ def sigmoid(z):
 
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
-    return sigmoid(z)*(1-sigmoid(z))
+    s = sigmoid(z)
+    return s*(1-s)
