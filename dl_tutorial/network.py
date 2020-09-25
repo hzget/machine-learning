@@ -27,13 +27,14 @@ class Network(object):
           [2, 3, 1] --- 3-layers with 2/3/1 neurons respectively.
           
         weights and biases are params between layers.
+        X ---> sigmoid(w dot X + b)  ---> a
         For the example of [2, 3, 1]:
 
         formula between layer 1 and layer 2:
         [x1, x2] 
-             sigmoid([x1, x2] * [w11, w12] + b1) ---> a1
-         --> sigmoid([x1, x2] * [w21, w22] + b2) ---> a2
-             sigmoid([x1, x2] * [w31, w32] + b3) ---> a3
+             sigmoid([w11, w12] dot [x1, x2] + b1) ---> a1
+        ---> sigmoid([w21, w22] dot [x1, x2] + b2) ---> a2
+             sigmoid([w31, w32] dot [x1, x2] + b3) ---> a3
         params between layer 1 and layer 2:
           w = [[w11, w12],          b = [b1,
                [w21, w22],               b2,
@@ -41,9 +42,9 @@ class Network(object):
 
         formula between layer 2 and layer 3:
         [a1, a2, a3] 
-         --> sigmoid([a1, a2, a3] * [w211, w212, w213] + b) ---> y
+         --> sigmoid([w1, w2, w3] dot [a1, a2, a3] + b) ---> y
         params between layer 2 and layer 3:
-          w = [w211, w212, w213]    b = b
+          w = [w1, w2, w3]    b = b
         """
         self.num_layers = len(sizes)
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
