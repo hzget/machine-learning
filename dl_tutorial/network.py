@@ -51,7 +51,7 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
-        self.costs = []
+        self.costs = [] # used for investigating cost performance after some steps
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -62,20 +62,16 @@ class Network(object):
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
         """Train the neural network using mini-batch stochastic
-        gradient descent.  The ``training_data`` is a list of tuples
-        ``(x, y)`` representing the training inputs and the desired
-        outputs.  The other non-optional parameters are
-        self-explanatory.  If ``test_data`` is provided then the
-        network will be evaluated against the test data after each
-        epoch, and partial progress printed out.  This is useful for
-        tracking progress, but slows things down substantially."""
+        gradient descent."""
         if test_data: n_test = len(test_data)
         n = len(training_data)
         start = time.time()
+
         self.costs = []
         cost = self.average_cost(training_data)
         self.costs.append(cost)
         print("Epoch {0}: initial average cost {1}".format(0, cost))
+
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -83,6 +79,9 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
+                
+            # we can stop the training if cost is small enough
+            # but it is used only for investigation currently.
             cost = self.average_cost(training_data)
             self.costs.append(cost)
             print("Epoch {0}: updated average cost {1}".format( j, cost))
@@ -145,6 +144,7 @@ class Network(object):
                  for X, y in data]
         return np.average(norms)
     
+    # if the cost is very small, we can say that the model fits the training data
     def show_average_cost(self, data):
         cost = self.average_cost(data)
         print("current average cost {0}".format(cost))

@@ -12,7 +12,7 @@ net.SGD(training_data, 3, 10, 3.0, test_data=test_data)
 print("len of costs is {0}".format(len(net.costs)))
 
 # draw a picture
-plt.plot(net.costs)
+plt.plot(net.costs, marker = 'o')
 plt.xlabel('# of running')
 plt.ylabel('average cost')
 plt.show()
