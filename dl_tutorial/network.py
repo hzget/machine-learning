@@ -18,6 +18,7 @@ import time
 
 # Third-party libraries
 import numpy as np
+from numpy import linalg as LA
 
 class Network(object):
 
@@ -50,6 +51,7 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        self.costs = []
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -70,6 +72,10 @@ class Network(object):
         if test_data: n_test = len(test_data)
         n = len(training_data)
         start = time.time()
+        self.costs = []
+        cost = self.average_cost(training_data)
+        self.costs.append(cost)
+        print("Epoch {0}: initial average cost {1}".format(0, cost))
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -77,6 +83,9 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
+            cost = self.average_cost(training_data)
+            self.costs.append(cost)
+            print("Epoch {0}: updated average cost {1}".format( j, cost))
             if test_data:
                 print("Epoch {0}: {1} / {2}".format(
                     j, self.evaluate(test_data), n_test))
@@ -130,6 +139,15 @@ class Network(object):
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
+
+    def average_cost(self, data):
+        norms = [LA.norm((self.feedforward(X)- y).reshape(10))
+                 for X, y in data]
+        return np.average(norms)
+    
+    def show_average_cost(self, data):
+        cost = self.average_cost(data)
+        print("current average cost {0}".format(cost))
 
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural
