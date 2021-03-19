@@ -52,6 +52,7 @@ class Network(object):
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
         self.costs = [] # used for investigating cost performance after some steps
+        self.check_cost_inside_SGD = False
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -82,7 +83,7 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta)
                 # collect cost value after consuming some inputs
                 count = (idx+1) * mini_batch_size
-                if ( j == 0 and 
+                if ( j == 0 and self.check_cost_inside_SGD and
                      (idx < 50 or 
                       (count <= 6000 and count % 100 == 0) or 
                       count % 1000 == 0)
@@ -160,6 +161,9 @@ class Network(object):
     def show_average_cost(self, data):
         cost = self.average_cost(data)
         print("current average cost {0}".format(cost))
+
+    def set_check_cost_inside_SGD(self):
+        self.check_cost_inside_SGD = True
 
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural

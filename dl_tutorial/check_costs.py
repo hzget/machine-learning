@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 net = network.Network([784, 30, 10])
+net.set_check_cost_inside_SGD()
 net.SGD(training_data, 5, 10, 3.0, test_data=test_data)
 
 # draw a picture
