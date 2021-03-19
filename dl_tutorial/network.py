@@ -67,9 +67,10 @@ class Network(object):
         n = len(training_data)
         start = time.time()
 
+        # cost data are used only for investigation
         self.costs = []
         cost = self.average_cost(training_data)
-        self.costs.append(cost)
+        self.costs.append((0, cost))
         print("Epoch {0}: initial average cost {1}".format(0, cost))
 
         for j in range(epochs):
@@ -77,13 +78,24 @@ class Network(object):
             mini_batches = [
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
-            for mini_batch in mini_batches:
+            for idx, mini_batch in enumerate(mini_batches):
                 self.update_mini_batch(mini_batch, eta)
+                # collect cost value after consuming some inputs
+                count = (idx+1) * mini_batch_size
+                if ( j == 0 and 
+                     (idx < 50 or 
+                      (count <= 6000 and count % 100 == 0) or 
+                      count % 1000 == 0)
+                   ):
+                    cost = self.average_cost(training_data)
+                    self.costs.append((count,cost))
+                    print("Epoch {0} count {1}: updated average cost {2}".format(
+                          j, count , cost))
                 
             # we can stop the training if cost is small enough
             # but it is used only for investigation currently.
             cost = self.average_cost(training_data)
-            self.costs.append(cost)
+            self.costs.append((n*(j+1),cost))
             print("Epoch {0}: updated average cost {1}".format( j, cost))
             if test_data:
                 print("Epoch {0}: {1} / {2}".format(
