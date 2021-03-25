@@ -20,6 +20,9 @@ import time
 import numpy as np
 from numpy import linalg as LA
 
+import joblib
+import mnist_loader
+
 class Network(object):
 
     def __init__(self, sizes):
@@ -53,6 +56,12 @@ class Network(object):
                         for x, y in zip(sizes[:-1], sizes[1:])]
         self.costs = [] # used for investigating cost performance after some steps
         self.check_cost_inside_SGD = False
+    
+    def fit(self, X):
+        return self.SGD(X)
+    
+    def predict(self, a):
+        return self.feedforward(a)
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -60,7 +69,7 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def SGD(self, training_data, epochs=30, mini_batch_size=10, eta=3.0,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent."""
@@ -176,8 +185,21 @@ class Network(object):
 
     def cost_derivative(self, output_activations, y):
         return (output_activations-y)
+    
+    def save_model(self):
+        joblib.dump(self, "my_model.pkl")
+    
 
-#### Miscellaneous functions
 def sigmoid(z):
     """The sigmoid function."""
     return 1.0/(1.0+np.exp(-z))
+
+def load_model():
+    return joblib.load("my_model.pkl")
+
+def train_model():
+    training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+    net = Network([784, 30, 10])
+    net.fit(training_data)
+    net.save_model()
+    return net
