@@ -13,7 +13,7 @@ def init_axes(ax, title):
 
 fig = plt.figure()
 ax = plt.subplot(221)
-init_axes(ax, "First: write a digit")
+init_axes(ax, "write a digit")
 
 ax2 = plt.subplot(222)
 init_axes(ax2, "preprocessed image")
@@ -64,6 +64,14 @@ class btaction:
         prepared = imp.prepare_data(a)
         clear_axes4()
         plotimg(prepared)
+    
+    def load_image(self,event):
+        global x, y, a
+        b = imp.loadimage()
+        ys, xs = imp.convert_to_xy(b)
+        y, x = ys.tolist(), xs.tolist()
+        a = b
+        fresh_img(x,y)
 
 def clear_axes4():
     plt.subplot(2,2,4)
@@ -118,20 +126,20 @@ fig.canvas.mpl_connect("button_press_event", on_press)
 fig.canvas.mpl_connect("button_release_event", on_release)
 
 callback = btaction()
-axpreprocess = plt.axes([0.2, 0.3, 0.2, 0.075])
+axpreprocess = plt.axes([0.2, 0.35, 0.2, 0.075])
 bpreprocess = Button(axpreprocess, 'preprocess')
 bpreprocess.on_clicked(callback.preprocess)
 
-axpredict = plt.axes([0.2, 0.2, 0.2, 0.075])
+axpredict = plt.axes([0.2, 0.25, 0.2, 0.075])
 bpredict= Button(axpredict, 'predict')
 bpredict.on_clicked(callback.print_predict)
 
-axclear = plt.axes([0.2, 0.1, 0.2, 0.075])
+axclear = plt.axes([0.2, 0.15, 0.2, 0.075])
 bclear = Button(axclear, 'clear')
 bclear.on_clicked(callback.clear_xypoints)
 
-#axload = plt.axes([0.6, 0.1, 0.2, 0.075])
-#bloadmodel = Button(axload, 'load model')
-#bloadmodel.on_clicked(callback.load_model)
+axloadimage = plt.axes([0.2, 0.05, 0.2, 0.075])
+bloadimage = Button(axloadimage, 'load digit')
+bloadimage.on_clicked(callback.load_image)
 
 plt.show()

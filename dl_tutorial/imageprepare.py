@@ -1,4 +1,5 @@
 
+from PIL import Image
 from scipy.ndimage.filters import gaussian_filter
 import numpy as np
 
@@ -9,7 +10,7 @@ def prepare_data(arr):
     return b
 
 def move_to_center(im_arr):
-    xs, ys = convert_to_xy(im_arr)
+    ys, xs = convert_to_xy(im_arr)
     delta_x = xs - np.average(xs)
     delta_y = ys - np.average(ys)
     xs2 = 14 + delta_x 
@@ -24,7 +25,7 @@ def move_to_center(im_arr):
             y1 = 27
         if y1 < 0:
             y1 = 0
-        b[int(x1),int(y1)] = 1
+        b[int(y1),int(x1)] = 1
     return b
 
 def blur_withnearest(input):
@@ -40,11 +41,20 @@ def blur_withnearest(input):
     return output
     
 def convert_to_xy(im_arr):
-    xs, ys = [], []
+    ys, xs = [], []
     for x1 in range(28):
         for y1 in range(28):
-            if im_arr[x1, y1] > 0:
+            if im_arr[y1, x1] > 0:
                 xs.append(x1)
                 ys.append(y1)
-    return np.array(xs), np.array(ys)
+    return np.array(ys), np.array(xs)
+
+def loadimage():
+    size = 28, 28
+    img = Image.open('pic/digit.png')
+    img = img.resize(size, Image.NEAREST)
+    im = np.array(img)
+    im = im[:,:,0]
+    b = im/255
+    return b
 
