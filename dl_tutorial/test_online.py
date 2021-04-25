@@ -37,12 +37,18 @@ class btaction:
         global net
         net = net.load_model()
 
+    def train_model(self,event):
+        global net, btrain 
+        btrain.set_active(False)
+        net = network.train_model(epochs=3, mini_batch_size=100, eta=3.0)
+        btrain.set_active(True)
+
     def print_predict(self, event):
         global prepared
         p = predict(prepared)
         print("scores of the digits 0~9:\n {}".format(p))
         print("most likely to be: {}".format(np.argmax(p)))
-        clear_axes4()
+        clear_axis4()
         s1 = "scores of the digits 0~9:"
         s2 = "{}\n".format(p)
         s3 = "most likely to be: {}".format(np.argmax(p))
@@ -50,19 +56,26 @@ class btaction:
         plt.text(0.1, -0.1, s2, fontsize=9)
         plt.text(0.1, -0.2, s3, fontsize=15, weight='bold', color='r')
     
+    def plot_prediction(self, event):
+        global prepared
+        clear_axis4()
+        ax4 = plt.subplot(2,2,4)
+#        plt.axis('on')
+        plotscoreimg(scores=predict(prepared), ax=ax4)
+    
     def clear_xypoints(self, event):
         global x,y,a,ax2, prepared
         x,y = [],[]
         a = np.zeros((28,28))
         prepared = np.zeros((28,28))
         init_axes(ax2, "preprocessed image")
-        clear_axes4()
+        reset_axis4()
         fresh_img(x,y)
     
     def preprocess(self,event):
         global a, prepared
         prepared = imp.prepare_data(a)
-        clear_axes4()
+        reset_axis4()
         plotimg(prepared)
     
     def load_image(self,event):
@@ -73,14 +86,35 @@ class btaction:
         a = b
         fresh_img(x,y)
 
-def clear_axes4():
+def clear_axis4():
     plt.subplot(2,2,4)
     plt.cla()
-    plt.axis('off')
+#    plt.axis('off')
+
+def reset_axis4():
+    plt.subplot(2,2,4)
+    plt.cla()
+    X = np.arange(10)
+    scores = np.ones(10)*0.5
+    bar = plt.bar(X.astype(str), scores.reshape(-1), fill=False, ls=':', label='?')
+    plt.bar_label(bar, labels=['?']*10, label_type='center')
+    xlabel = "most likely to be: {}".format("?")
+    plt.xlabel(xlabel, fontsize=15, weight='bold', c='gray')
+    plt.ylim(0, 1.1)
 
 def plotimg(im_arr):
     ax2 = plt.subplot(222)
     plt.imshow(im_arr, cmap='gray')
+
+def plotscoreimg(scores, ax):
+    X = np.arange(10)
+    digit = np.argmax(scores)
+    ax.bar(X.astype(str), scores.reshape(-1))
+#    ax.set_title("scores of 0~9")
+    xlabel = "most likely to be: {}".format(digit)
+    ax.set_xlabel(xlabel, weight='bold', color='r')
+    ax.set_ylabel("scores of 0~9")
+    ax.set_ylim(0, 1.1)
 
 def predict(im_arr):
     global net
@@ -132,14 +166,20 @@ bpreprocess.on_clicked(callback.preprocess)
 
 axpredict = plt.axes([0.2, 0.25, 0.2, 0.075])
 bpredict= Button(axpredict, 'predict')
-bpredict.on_clicked(callback.print_predict)
+bpredict.on_clicked(callback.plot_prediction)
 
 axclear = plt.axes([0.2, 0.15, 0.2, 0.075])
 bclear = Button(axclear, 'clear')
 bclear.on_clicked(callback.clear_xypoints)
 
-axloadimage = plt.axes([0.2, 0.05, 0.2, 0.075])
-bloadimage = Button(axloadimage, 'load digit')
-bloadimage.on_clicked(callback.load_image)
+#axtrain = plt.axes([0.2, 0.05, 0.2, 0.075])
+#btrain = Button(axtrain, 'train model')
+#btrain.on_clicked(callback.train_model)
+
+#axloadimage = plt.axes([0.2, 0.05, 0.2, 0.075])
+#bloadimage = Button(axloadimage, 'load digit')
+#bloadimage.on_clicked(callback.load_image)
+
+reset_axis4()
 
 plt.show()
