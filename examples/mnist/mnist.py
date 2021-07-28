@@ -80,17 +80,15 @@ class mnist_nn(object):
                        validation_data=(self.x_val, self.y_val),
                        callbacks = [keras.callbacks.EarlyStopping(monitor='val_loss', patience=1)])
     
-    def save_model(self):
-        self.model.save("my_keras_model.h5")
+    def save_model(self, name="my_keras_model.h5"):
+        self.model.save(name)
 
-def load_model():
+def load_model(name="my_keras_model.h5"):
     try:
-        return keras.models.load_model("my_keras_model.h5")
+        return keras.models.load_model(name)
     except (FileNotFoundError, IOError):
-        mnn = mnist_nn()
-        mnn.train_model()
-        mnn.save_model()
-        return mnn.model
+        print(f'The model {name} is not found, please train the model with "python train_model --model_file FILENAME"')
+        return []
 
 def create_tuner():
     hypermodel = MyHyperModel(classes=10)

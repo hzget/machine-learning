@@ -2,10 +2,7 @@
 mnist_loader
 ~~~~~~~~~~~~
 
-A library to load the MNIST image data.  For details of the data
-structures that are returned, see the doc strings for ``load_data``
-and ``load_data_wrapper``.  In practice, ``load_data_wrapper`` is the
-function usually called by our neural network code.
+A library to load the MNIST image data from keras build-in dataset.
 """
 
 from tensorflow import keras
@@ -24,7 +21,8 @@ def load_local_mnist():
     
 def load_keras_mnist():
     """Return the MNIST data as a tuple containing the training data,
-    load data from keras build-in dataset and then convert 28x28 
+    load data from keras build-in dataset and then normalize the
+    data, after that reshape the data. 
     """
     (x, y), (x_test, y_test) = keras.datasets.mnist.load_data()
 

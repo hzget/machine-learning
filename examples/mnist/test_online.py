@@ -3,6 +3,8 @@ import numpy as np
 from matplotlib.widgets import Button
 import mnist
 import imageprepare as imp
+import tkinter
+import tkinter.filedialog
 
 def init_axes(ax, title):
     ax.cla()
@@ -19,10 +21,12 @@ ax2 = plt.subplot(222)
 init_axes(ax2, "preprocessed image")
 
 model = mnist.load_model()
+tkroot = tkinter.Tk()
+tkroot.withdraw()
 
 x,y = [], []
 a = np.zeros((28,28))
-prepared = a.copy()
+prepared = []
 # create empty plot
 points, = ax.plot([], [], 'o')
 # ax.grid(True)
@@ -34,54 +38,42 @@ is_released = True
 
 class btaction:
 
-#    def train_model(self,event):
-#        global net, btrain 
-#        btrain.set_active(False)
-#        net = network.train_model(epochs=3, mini_batch_size=100, eta=3.0)
-#        btrain.set_active(True)
-
-    def print_predict(self, event):
-        global prepared
-        p = predict(prepared)
-        print("scores of the digits 0~9:\n {}".format(p))
-        print("most likely to be: {}".format(np.argmax(p)))
-        clear_axis4()
-        s1 = "scores of the digits 0~9:"
-        s2 = "{}\n".format(p)
-        s3 = "most likely to be: {}".format(np.argmax(p))
-        plt.text(0.1, 0.9, s1, fontsize=9, weight='bold')
-        plt.text(0.1, -0.1, s2, fontsize=9)
-        plt.text(0.1, -0.2, s3, fontsize=15, weight='bold', color='r')
-    
     def plot_prediction(self, event):
-        global prepared
-        clear_axis4()
-        ax4 = plt.subplot(2,2,4)
-#        plt.axis('on')
-        plotscoreimg(scores=predict(prepared), ax=ax4)
+        global prepared, model
+        if not len(prepared):
+            alert('please write a digit and preprocess it')
+        elif not model:
+            alert('please choose a pre-trained model')
+        else:
+            clear_axis4()
+            ax4 = plt.subplot(2,2,4)
+            plotscoreimg(scores=predict(prepared), ax=ax4)
     
     def clear_xypoints(self, event):
         global x,y,a,ax2, prepared
         x,y = [],[]
         a = np.zeros((28,28))
-        prepared = np.zeros((28,28))
+        prepared = []
         init_axes(ax2, "preprocessed image")
         reset_axis4()
         fresh_img(x,y)
     
     def preprocess(self,event):
         global a, prepared
+        if a.max() < 0.1 :
+            alert('please write a digit at first')
+            return []
         prepared = imp.prepare_data(a)
         reset_axis4()
         plotimg(prepared)
     
-    def load_image(self,event):
-        global x, y, a
-        b = imp.loadimage()
-        ys, xs = imp.convert_to_xy(b)
-        y, x = ys.tolist(), xs.tolist()
-        a = b
-        fresh_img(x,y)
+    def select_model(self,event):
+        global model
+        filename = tkinter.filedialog.askopenfilename()
+        model = mnist.load_model(filename)
+
+def alert(msg):
+    tkinter.messagebox.showwarning(message=msg)
 
 def clear_axis4():
     plt.subplot(2,2,4)
@@ -169,13 +161,9 @@ axclear = plt.axes([0.2, 0.15, 0.2, 0.075])
 bclear = Button(axclear, 'clear')
 bclear.on_clicked(callback.clear_xypoints)
 
-#axtrain = plt.axes([0.2, 0.05, 0.2, 0.075])
-#btrain = Button(axtrain, 'train model')
-#btrain.on_clicked(callback.train_model)
-
-#axloadimage = plt.axes([0.2, 0.05, 0.2, 0.075])
-#bloadimage = Button(axloadimage, 'load digit')
-#bloadimage.on_clicked(callback.load_image)
+axselectmodel = plt.axes([0.2, 0.03, 0.2, 0.075])
+bmodel = Button(axselectmodel, 'selectModel')
+bmodel.on_clicked(callback.select_model)
 
 reset_axis4()
 
